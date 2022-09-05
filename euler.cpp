@@ -11,7 +11,9 @@ tuple<vector<double>, double, vector<double>> eulerSolver(vector<vector<double>>
 }
 
 double gethmax(vector<vector<double>> KinvM) {
-
+	max_eigenvalue = findMaxEigenvalue(KinvM);
+	h_max = 2/max_eigenvalue;
+	return h_max;
 }
 
 double findMaxEigenvalue(KinvM) {
