@@ -1,2 +1,6 @@
 #Compiled Object Files
 *.o
+
+
+#Test Files
+eulertest.cpp
