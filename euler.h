@@ -1,17 +1,17 @@
 #ifndef EULER_H
 #define EULER_H
 
-tuple<std::vector<int>,int,std::vector<int>> eulerSolver(vector<vector<double>> &K, vector<vector<double>> &M, vector<double> &u_0, vector<double> &f);
+std::tuple<std::vector<double>,double,std::vector<double>> eulerSolver(std::vector<std::vector<double>> &K, std::vector<std::vector<double>> &M, std::vector<double> &u_0, std::vector<double> &f);
 
-double gethmax(vector<vector<double>> KinvM);
+double gethmax(std::vector<std::vector<double>> &KinvM);
 
-double findMaxEigenvalue(KinvM);
+double findMaxEigenvalue(std::vector<std::vector<double>> &KinvM);
 
-vector<double> solveSingleStep(vector<double> &u_k vector<vector<double>> &P);
+std::vector<double> solveSingleStep(std::vector<double> &u_k, std::vector<std::vector<double>> &P);
 
-vector<vector<double>> createP(vector<vector<double>> &M);
+std::vector<std::vector<double>> createP(std::vector<std::vector<double>> &M);
 
-vector<vector<double>> multMatrix(vector<vector<double>> &A, vector<vector<double>> &B);
+std::vector<std::vector<double>> multMatrix(std::vector<std::vector<double>> &A, std::vector<std::vector<double>> &B);
 
 
 #endif

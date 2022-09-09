@@ -1,6 +1,6 @@
 #Compiled Object Files
 *.o
-
+*.out
 
 #Test Files
 eulertest.cpp
