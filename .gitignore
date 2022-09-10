@@ -4,3 +4,6 @@
 
 #Test Files
 eulertest.cpp
+
+#Bash Scripts
+*.sh

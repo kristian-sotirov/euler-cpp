@@ -19,7 +19,7 @@ std::vector<std::vector<double>> LUdecomp(std::vector<std::vector<double>> &M);
 
 std::vector<std::vector<double>> forwardSub(std::vector<std::vector<double>> &L);
 
-std::vector<std::vector<double>> backwardSub(std::vector<std::vector<double>> &U);
+std::vector<std::vector<double>> backwardSub(std::vector<std::vector<double>> &U, std::vector<std::vector<double>> &invM);
 
 std::vector<std::vector<double>> createIDmatrix(int size);
 
