@@ -3,6 +3,7 @@
 #include <tuple>
 #include "euler.h"
 #include <string>
+#include<cmath>
 
 //THIS FUNCTION IS UNFINISHED!!!!!!!!!!
 std::tuple<std::vector<double>, double, std::vector<double>> eulerSolver(std::vector<std::vector<double>> &K, std::vector<std::vector<double>> &M, std::vector<double> &u_0, std::vector<double> &f) {
@@ -10,6 +11,10 @@ std::tuple<std::vector<double>, double, std::vector<double>> eulerSolver(std::ve
 	std::tuple<std::vector<double>, double, std::vector<double>> return_value = std::make_tuple(u_0, 0.0, f);
 	
 	std::vector<std::vector<double>> invM = invLUfact(M);
+	std::vector<std::vector<double>> KinvM = multMatrix(K, M);
+	
+	double h = gethmax(KinvM);
+	h *= 0.8;
 	
 	return return_value;
 
@@ -21,10 +26,41 @@ double gethmax(std::vector<std::vector<double>> &KinvM) {
 	return h_max;
 }
 
-//THIS FUNCTION IS UNFINISHED!!!!!!!!!
 double findMaxEigenvalue(std::vector<std::vector<double>> &KinvM) {
-	return 1.0;
+
+	int n = KinvM.size();
+	int num_iter = 10000;
+	std::vector<double> eigvec = std::vector<double>(n, 0.0);
+	eigvec[0] = 1.0;
+	double eigvec_norm = 1.0;
+	for(int i = 0; i < num_iter; i++) {
+		eigvec = multMatrixVec(KinvM, eigvec);
+		eigvec_norm = vecMult(eigvec, eigvec);
+		for(int j = 0; j < n; j++) {
+			eigvec[j] /= eigvec_norm;
+		}
+	}
+	std::vector<double> eigvec2 = multMatrixVec(KinvM,eigvec);
+	double eigval = vecMult(eigvec, eigvec2);
+	return eigval * eigval;
 }
+
+double vecMult(std::vector<double> &u, std::vector<double> &v) {
+	
+	int p = u.size();
+	double  mult_value = 0.0;
+	
+	if (p != v.size()) {
+		std::cout << "The vectors cannot be multiplied" << std::endl;
+		return mult_value;
+	}
+	
+	for (int i = 0; i < p; i++) {
+		mult_value += u[i] * v[i];
+	}
+	return sqrt(mult_value); 
+}
+
 //THIS FUNCTION IS UNFINISHED!!!!!!!!!
 std::vector<double> solveSingleStep(std::vector<double> &u_k, std::vector<std::vector<double>> &P) {
 	std::vector<double> solution_vector(5, 0.0);
@@ -36,60 +72,18 @@ std::vector<std::vector<double>> createP(std::vector<std::vector<double>> &M) {
 	return P;
 }
 
+//This functions find the inverse of a matrix using the LU factorisation.
+std::vector<std::vector<double>> invLUfact(std::vector<std::vector<double>> M) {
 
-std::vector<std::vector<double>> invLUfact(std::vector<std::vector<double>> &M) {
-	
-	// Done
-	std::vector<std::vector<double>> M_decompLU = LUdecomp(M);
-	
-	// Done
-	std::vector<std::vector<double>> semi_invM = forwardSub(M_decompLU);
-	
-	
-	std::vector<std::vector<double>> invM = backwardSub(M_decompLU, semi_invM);
-	
-	return invM;
-}
-
-
-std::vector<std::vector<double>> LUdecomp(std::vector<std::vector<double>> &M) {
-	std::vector<std::vector<double>> M_decompLU = M;
 	int n = M.size();
-	for (int k = 0; k < n-1; k++) {
-		for (int j = k+1; j < n; j++) {
-			M_decompLU[j][k] /= M_decompLU[k][k];
-			for (int i = k+1; i < n; i++) {
-				M_decompLU[j][i] -= M_decompLU[j][k]*M_decompLU[k][i];
-			}
-		}
-	}
-	return M_decompLU;
-}
-
-std::vector<std::vector<double>> forwardSub(std::vector<std::vector<double>> &L) {
-	int n = L.size();
-	std::vector<std::vector<double>> ID = createIDmatrix(n);
-	//std::vector<std::vector<double>> semi_invM = std::vector<std::vector<double>>(size, std::vector<double>(size, 0.0));
+	std::vector<std::vector<double>> invM = createIDmatrix(n);
 	
-	for(int IDcolumn = 0; IDcolumn < n; IDcolumn++) {
-		//semi_invM[0][IDcolumn] = ID[0][IDcolumn];
-		for (int i = 1; i < n; i++) {
-			for (int j = 0; j < i; j++) {
-				ID[i][IDcolumn] -= L[i][j]*ID[j][IDcolumn];
-			}
-			//ID[i][IDcolumn] /= L[i][i];
-		}
-	}
-	
-	return ID;
-}
-
-//THIS FUNCTION IS UNFINISHED!!!!!!!!!
-std::vector<std::vector<double>> backwardSub(std::vector<std::vector<double>> &U, std::vector<std::vector<double>> &invM) {
+ 	LUdecomp(M);
+	forwardSub(M,invM);
+ 	backwardSub(M, invM);
 	
 	return invM;
 }
-
 
 std::vector<std::vector<double>> createIDmatrix(int size) {
 
@@ -100,9 +94,46 @@ std::vector<std::vector<double>> createIDmatrix(int size) {
 	return ID;
 }
 
+void LUdecomp(std::vector<std::vector<double>> &M) {
+
+	std::vector<std::vector<double>> M_decompLU = M;
+	int n = M.size();
+	for (int k = 0; k < n-1; k++) {
+		for (int j = k+1; j < n; j++) {
+			M[j][k] /= M[k][k];
+			for (int i = k+1; i < n; i++) {
+				M[j][i] -= M[j][k]*M[k][i];
+			}
+		}
+	}
+}
+
+void forwardSub(std::vector<std::vector<double>> L, std::vector<std::vector<double>> &ID) {
+	int n = L.size();
+	
+	for(int IDcolumn = 0; IDcolumn < n; IDcolumn++) {
+		for (int i = 1; i < n; i++) {
+			for (int j = 0; j < i; j++) {
+				ID[i][IDcolumn] -= L[i][j]*ID[j][IDcolumn];
+			}
+		}
+	}
+}
 
 
-
+void backwardSub(std::vector<std::vector<double>> U, std::vector<std::vector<double>> &invM) {
+	
+	int n = U.size();
+	for(int columns = 0; columns < n; columns++) {
+		invM[n-1][columns] /= U[n-1][n-1];
+		for(int i = n-2; i >=0; i--) {
+			for (int j = n-1; j > i; j--) {
+				invM[i][columns] -= U[i][j]*invM[j][columns];
+			}
+			invM[i][columns] /= U[i][i];
+		}
+	}
+}
 
 
 std::vector<std::vector<double>> multMatrix(std::vector<std::vector<double>> &A, std::vector<std::vector<double>> &B) {
@@ -129,4 +160,43 @@ std::vector<std::vector<double>> multMatrix(std::vector<std::vector<double>> &A,
 	}
 	
 	return C;
+}
+
+std::vector<double> multMatrixVec(std::vector<std::vector<double>> &A, std::vector<double> &v) {
+	int m = A.size();
+	int p = A[0].size();
+	
+	if(p != v.size()) {
+		std::cout << "The matrix and the vector cannot be multiplied" << std::endl;
+		return v;
+	}
+	
+	std::vector<double> u(m);
+	
+	for(int i = 0; i < m; i++) {
+		for(int j = 0; j < p; j++) {
+			u[i] += A[i][j]*v[j];
+		}
+	}
+	return u;
+}
+
+std::vector<double> multVecMatrix(std::vector<double> &v, std::vector<std::vector<double>> &B) {
+	int p = v.size();
+	
+	if(p != B.size()) {
+		std::cout << "The matrix and the vector cannot be multiplied" << std::endl;
+		return v;
+	}
+	
+	int n = B[0].size();
+	
+	std::vector<double> u(n);
+	
+	for(int i = 0; i < n; i++) {
+		for(int j = 0; j < p; j++) {
+			u[i] += v[j]*B[j][i];
+		}
+	}
+	return u;
 }
