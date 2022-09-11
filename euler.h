@@ -1,7 +1,7 @@
 #ifndef EULER_H
 #define EULER_H
 
-std::tuple<std::vector<double>,double,std::vector<double>> eulerSolver(std::vector<std::vector<double>> &K, std::vector<std::vector<double>> &M, std::vector<double> &u_0, std::vector<double> &f);
+std::tuple<std::vector<double>,double,std::vector<double>> eulerSolver(std::vector<std::vector<double>> &K, std::vector<std::vector<double>> &M, std::vector<double> &u_0, std::vector<double> &f, int N);
 
 double gethmax(std::vector<std::vector<double>> &KinvM);
 

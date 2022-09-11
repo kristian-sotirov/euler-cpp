@@ -7,16 +7,17 @@
 #include "mult.h"
 
 //THIS FUNCTION IS UNFINISHED!!!!!!!!!!
-std::tuple<std::vector<double>, double, std::vector<double>> eulerSolver(std::vector<std::vector<double>> &K, std::vector<std::vector<double>> &M, std::vector<double> &u_0, std::vector<double> &f) {
+std::tuple<std::vector<double>, double, std::vector<double>> eulerSolver(std::vector<std::vector<double>> &K, std::vector<std::vector<double>> &M, std::vector<double> &u_0, std::vector<double> &f, int N) {
 	
 	std::tuple<std::vector<double>, double, std::vector<double>> return_value = std::make_tuple(u_0, 0.0, f);
 	
 	std::vector<std::vector<double>> invM = invLUfact(M);
-	std::vector<std::vector<double>> KinvM = multMatrix(K, M);
+	std::vector<std::vector<double>> KinvM = multMatrix(K, invM);
 	
 	double h = gethmax(KinvM);
 	h *= 0.8;
 	
+	std::vector<std::vector<double>> P = createP(M);
 	
 	return return_value;
 
@@ -52,9 +53,23 @@ std::vector<double> solveSingleStep(std::vector<double> &u_k, std::vector<std::v
 	std::vector<double> solution_vector(5, 0.0);
 	return solution_vector;
 }
-//THIS FUNCTION IS UNFINISHED!!!!!!!!!
+
+
 std::vector<std::vector<double>> createP(std::vector<std::vector<double>> &M) {
-	std::vector<std::vector<double>> P = {{0.0,0.0,0.0}, {0.0,0.0,0.0}};
+	int size = M.size();
+	
+	std::vector<std::vector<double>> P = std::vector<std::vector<double>>(size, std::vector<double>(size, 0.0));
+	
+	for(int i = 0; i < size; i++) {
+		if(i != 0) {
+			P[i][i-1] = M[i][i-1];
+		}
+		P[i][i] = M[i][i];
+		if (i != size - 1) {
+			P[i][i+1] = M[i][i+1];
+		}
+	}
+	
 	return P;
 }
 
