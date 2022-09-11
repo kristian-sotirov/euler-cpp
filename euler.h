@@ -7,17 +7,9 @@ double gethmax(std::vector<std::vector<double>> &KinvM);
 
 double findMaxEigenvalue(std::vector<std::vector<double>> &KinvM);
 
-double vecMult(std::vector<double> &u, std::vector<double> &v);
-
 std::vector<double> solveSingleStep(std::vector<double> &u_k, std::vector<std::vector<double>> &P);
 
 std::vector<std::vector<double>> createP(std::vector<std::vector<double>> &M);
-
-std::vector<std::vector<double>> multMatrix(std::vector<std::vector<double>> &A, std::vector<std::vector<double>> &B);
-
-std::vector<double> multMatrixVec(std::vector<std::vector<double>> &A, std::vector<double> &v);
-
-std::vector<double> multVecMatrix(std::vector<double> &v, std::vector<std::vector<double>> &B);
 
 std::vector<std::vector<double>> invLUfact(std::vector<std::vector<double>> M);
 

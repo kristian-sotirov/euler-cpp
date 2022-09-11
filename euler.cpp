@@ -3,7 +3,8 @@
 #include <tuple>
 #include "euler.h"
 #include <string>
-#include<cmath>
+#include <cmath>
+#include "mult.h"
 
 //THIS FUNCTION IS UNFINISHED!!!!!!!!!!
 std::tuple<std::vector<double>, double, std::vector<double>> eulerSolver(std::vector<std::vector<double>> &K, std::vector<std::vector<double>> &M, std::vector<double> &u_0, std::vector<double> &f) {
@@ -15,6 +16,7 @@ std::tuple<std::vector<double>, double, std::vector<double>> eulerSolver(std::ve
 	
 	double h = gethmax(KinvM);
 	h *= 0.8;
+	
 	
 	return return_value;
 
@@ -43,22 +45,6 @@ double findMaxEigenvalue(std::vector<std::vector<double>> &KinvM) {
 	std::vector<double> eigvec2 = multMatrixVec(KinvM,eigvec);
 	double eigval = vecMult(eigvec, eigvec2);
 	return eigval * eigval;
-}
-
-double vecMult(std::vector<double> &u, std::vector<double> &v) {
-	
-	int p = u.size();
-	double  mult_value = 0.0;
-	
-	if (p != v.size()) {
-		std::cout << "The vectors cannot be multiplied" << std::endl;
-		return mult_value;
-	}
-	
-	for (int i = 0; i < p; i++) {
-		mult_value += u[i] * v[i];
-	}
-	return sqrt(mult_value); 
 }
 
 //THIS FUNCTION IS UNFINISHED!!!!!!!!!
@@ -135,68 +121,3 @@ void backwardSub(std::vector<std::vector<double>> U, std::vector<std::vector<dou
 	}
 }
 
-
-std::vector<std::vector<double>> multMatrix(std::vector<std::vector<double>> &A, std::vector<std::vector<double>> &B) {
-
-	int m = A.size();
-	int p = A[0].size();
-	
-	if(p != B.size()) {
-		std::cout << "The matrices cannot be multiplied" << std::endl;
-		return A;
-	}
-	int n = B[0].size(); 
-	
-	std::vector<std::vector<double>> C(m, std::vector<double>(n));
-	
-	for(int i = 0; i < m; i++) {
-		for(int j = 0; j < n; j++) {
-		
-			for(int k = 0; k < p; k++) {
-				
-				C[i][j] += A[i][k]*B[k][j];
-			}
-		}
-	}
-	
-	return C;
-}
-
-std::vector<double> multMatrixVec(std::vector<std::vector<double>> &A, std::vector<double> &v) {
-	int m = A.size();
-	int p = A[0].size();
-	
-	if(p != v.size()) {
-		std::cout << "The matrix and the vector cannot be multiplied" << std::endl;
-		return v;
-	}
-	
-	std::vector<double> u(m);
-	
-	for(int i = 0; i < m; i++) {
-		for(int j = 0; j < p; j++) {
-			u[i] += A[i][j]*v[j];
-		}
-	}
-	return u;
-}
-
-std::vector<double> multVecMatrix(std::vector<double> &v, std::vector<std::vector<double>> &B) {
-	int p = v.size();
-	
-	if(p != B.size()) {
-		std::cout << "The matrix and the vector cannot be multiplied" << std::endl;
-		return v;
-	}
-	
-	int n = B[0].size();
-	
-	std::vector<double> u(n);
-	
-	for(int i = 0; i < n; i++) {
-		for(int j = 0; j < p; j++) {
-			u[i] += v[j]*B[j][i];
-		}
-	}
-	return u;
-}
