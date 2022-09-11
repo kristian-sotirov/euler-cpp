@@ -9,16 +9,32 @@
 //THIS FUNCTION IS UNFINISHED!!!!!!!!!!
 std::tuple<std::vector<double>, double, std::vector<double>> eulerSolver(std::vector<std::vector<double>> &K, std::vector<std::vector<double>> &M, std::vector<double> &u_0, std::vector<double> &f, int N) {
 	
-	std::tuple<std::vector<double>, double, std::vector<double>> return_value = std::make_tuple(u_0, 0.0, f);
-	
 	std::vector<std::vector<double>> invM = invLUfact(M);
 	std::vector<std::vector<double>> KinvM = multMatrix(K, invM);
 	
 	double h = gethmax(KinvM);
 	h *= 0.8;
 	
-	std::vector<std::vector<double>> P = createP(M);
+	std::vector<std::vector<double>> MhK = createMhK(M, h, K);
+	std::vector<double> hf = createhf(h, f);
 	
+	
+	std::vector<double> u_k = u_0;	
+	std::vector<double> b = createb(hf, MhK, u_k);
+	
+	std::vector<std::vector<double>> P = createP(M);
+	std::vector<std::vector<double>> Pinv = invLUtridiagfact(P);
+	
+	std::vector<int> k_values = std::vector<int>(N, 0);
+	
+	for(int i = 1; i <= N; i++) {
+		std::tuple<std::vector<double>, int> step_answer = solveSingleStep(u_k, M, b, Pinv);
+		u_k = std::get<0>(step_answer);
+		k_values[i] = std::get<1>(step_answer);
+		b = createb(hf, MhK, _k);
+	}
+	
+	std::tuple<std::vector<double>, double, std::vector<double>> return_value = std::make_tuple(u_k, h, k_values);
 	return return_value;
 
 }
@@ -49,9 +65,13 @@ double findMaxEigenvalue(std::vector<std::vector<double>> &KinvM) {
 }
 
 //THIS FUNCTION IS UNFINISHED!!!!!!!!!
-std::vector<double> solveSingleStep(std::vector<double> &u_k, std::vector<std::vector<double>> &P) {
+std::tuple<std::vector<double>, int> solveSingleStep(std::vector<double> &u_k, std::vector<std::vector<double>> &A, std::vector<double> &b, std::vector<std::vector<double>> &P) {
 	std::vector<double> solution_vector(5, 0.0);
-	return solution_vector;
+	
+	
+	
+	std::tuple<std::vector<double>, int> step_solution = std::make_tuple(solution_vector, 0);
+	return step_solution;
 }
 
 
@@ -71,6 +91,72 @@ std::vector<std::vector<double>> createP(std::vector<std::vector<double>> &M) {
 	}
 	
 	return P;
+}
+
+std::vector<std::vector<double>> createMhK(std::vector<std::vector<double>> &M, double h, std::vector<std::vector<double>> &K) {
+
+	int size = M.size();
+	std::vector<std::vector<double>> MhK = M;
+	
+	for(int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++) {
+			MhK[i][j] -= h*K[i][j];
+		}
+	}
+	
+	return MhK;
+}
+
+std::vector<double> createhf(double h, std::vector<double> &f) {
+	int size = f.size();
+	std::vector<double> hf = f;
+	
+	for(int i = 0; i < size; i++) {
+		hf[i] *= h;
+	}
+	
+	return hf;
+}
+
+std::vector<double> createb(std::vector<double> &hf, std::vector<std::vector<double>> &MhK, std::vector<double> &u_k) {
+
+	int size = hf.size();
+	vector<double> b = multMatrixVec(MhK, u_k);
+	
+	for(int i = 0; i < size; i++) {
+		b[i] += hf;
+	}
+	
+	return b;
+}
+
+
+
+std::vector<std::vector<double>> invLUtridiagfact(std::vector<std::vector<double>> P) {
+	
+	int n = P.size();
+	std::vector<std::vector<double>> invP = createIDmatrix(n);
+	
+	tdLUdecomp(P);
+	tdforwardSub(P, invP);
+	backwardSub(P, invP);
+	
+	return invP;
+}
+
+//THIS FUNCTION IS UNFINISHED!!!!!!!!!
+void tdLUdecomp(std::vector<std::vector<double>> &P) {
+	
+}
+
+//THIS FUNCTION IS UNFINISHED!!!!!!!!!
+void tdforwardSub(std::vector<std::vector<double>> L, std::vector<std::vector<double>> &ID) {
+
+}
+
+//THIS FUNCTION IS UNFINISHED!!!!!!!!!
+void backwardSub(std::vector<std::vector<double>> U, std::vector<std::vector<double>> &invP) {
+
 }
 
 //This functions find the inverse of a matrix using the LU factorisation.
@@ -135,4 +221,3 @@ void backwardSub(std::vector<std::vector<double>> U, std::vector<std::vector<dou
 		}
 	}
 }
-
