@@ -7,7 +7,7 @@
 #include "mult.h"
 
 //THIS FUNCTION IS UNFINISHED!!!!!!!!!!
-std::tuple<std::vector<double>, double, std::vector<double>> eulerSolver(std::vector<std::vector<double>> &K, std::vector<std::vector<double>> &M, std::vector<double> &u_0, std::vector<double> &f, int N) {
+std::tuple<std::vector<double>, double, std::vector<int>> eulerSolver(std::vector<std::vector<double>> &K, std::vector<std::vector<double>> &M, std::vector<double> &u_0, std::vector<double> &f, int N) {
 	
 	std::vector<std::vector<double>> invM = invLUfact(M);
 	std::vector<std::vector<double>> KinvM = multMatrix(K, invM);
@@ -31,10 +31,10 @@ std::tuple<std::vector<double>, double, std::vector<double>> eulerSolver(std::ve
 		std::tuple<std::vector<double>, int> step_answer = solveSingleStep(u_k, M, b, Pinv);
 		u_k = std::get<0>(step_answer);
 		k_values[i] = std::get<1>(step_answer);
-		b = createb(hf, MhK, _k);
+		b = createb(hf, MhK, u_k);
 	}
 	
-	std::tuple<std::vector<double>, double, std::vector<double>> return_value = std::make_tuple(u_k, h, k_values);
+	std::tuple<std::vector<double>, double, std::vector<int>> return_value = std::make_tuple(u_k, h, k_values);
 	return return_value;
 
 }
@@ -121,10 +121,10 @@ std::vector<double> createhf(double h, std::vector<double> &f) {
 std::vector<double> createb(std::vector<double> &hf, std::vector<std::vector<double>> &MhK, std::vector<double> &u_k) {
 
 	int size = hf.size();
-	vector<double> b = multMatrixVec(MhK, u_k);
+	std::vector<double> b = multMatrixVec(MhK, u_k);
 	
 	for(int i = 0; i < size; i++) {
-		b[i] += hf;
+		b[i] += hf[i];
 	}
 	
 	return b;
@@ -139,24 +139,42 @@ std::vector<std::vector<double>> invLUtridiagfact(std::vector<std::vector<double
 	
 	tdLUdecomp(P);
 	tdforwardSub(P, invP);
-	backwardSub(P, invP);
+	tdbackwardSub(P, invP);
 	
 	return invP;
 }
 
-//THIS FUNCTION IS UNFINISHED!!!!!!!!!
+
 void tdLUdecomp(std::vector<std::vector<double>> &P) {
-	
+	int n = P.size();
+	for (int k = 0; k < n-1; k++) {
+		P[k+1][k] /= P[k][k];
+		P[k+1][k+1] -= P[k+1][k]*P[k][k+1]; 
+	}
 }
 
-//THIS FUNCTION IS UNFINISHED!!!!!!!!!
+
 void tdforwardSub(std::vector<std::vector<double>> L, std::vector<std::vector<double>> &ID) {
-
+	int n = L.size();
+	
+	for(int columns = 0; columns < n; columns++) {
+		for (int i = 1; i < n; i++) {
+			ID[i][columns] -= L[i][i-1]*ID[i-1][columns];
+		}
+	}
 }
 
-//THIS FUNCTION IS UNFINISHED!!!!!!!!!
-void backwardSub(std::vector<std::vector<double>> U, std::vector<std::vector<double>> &invP) {
 
+void tdbackwardSub(std::vector<std::vector<double>> U, std::vector<std::vector<double>> &invP) {
+	int n = U.size();
+	
+	for(int columns = 0; columns < n; columns++) {
+		invP[n-1][columns] /= U[n-1][n-1];
+		for(int i = n-2; i >= 0; i--) {
+			invP[i][columns] -= invP[i+1][columns]*U[i][i+1];
+			invP[i][columns] /=(U[i][i]);
+		}
+	}
 }
 
 //This functions find the inverse of a matrix using the LU factorisation.
@@ -183,7 +201,6 @@ std::vector<std::vector<double>> createIDmatrix(int size) {
 
 void LUdecomp(std::vector<std::vector<double>> &M) {
 
-	std::vector<std::vector<double>> M_decompLU = M;
 	int n = M.size();
 	for (int k = 0; k < n-1; k++) {
 		for (int j = k+1; j < n; j++) {
