@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include "mult.h"
 
 double vecMult(std::vector<double> &u, std::vector<double> &v) {
 	

@@ -9,13 +9,7 @@ double findMaxEigenvalue(std::vector<std::vector<double>> &KinvM);
 
 std::tuple<std::vector<double>, int> solveSingleStep(std::vector<double> &u_k, std::vector<std::vector<double>> &A, std::vector<double> &b, std::vector<std::vector<double>> &P);
 
-std::vector<std::vector<double>> createP(std::vector<std::vector<double>> &M);
-
-std::vector<std::vector<double>> createMhK(std::vector<std::vector<double>> &M, double h, std::vector<std::vector<double>> &K);
-
-std::vector<double> createhf(double h, std::vector<double> &f);
-
-std::vector<double> createb(std::vector<double> &hf, std::vector<std::vector<double>> &MhK, std::vector<double> &u_k);
+void generateNextStep(std::vector<double> &u_k, double, std::vector<double> &z_k);
 
 std::vector<std::vector<double>> invLUtridiagfact(std::vector<std::vector<double>> P);
 
