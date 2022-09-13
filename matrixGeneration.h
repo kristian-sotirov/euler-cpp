@@ -11,4 +11,5 @@ std::vector<double> createhf(double h, std::vector<double> &f);
 
 std::vector<double> createb(std::vector<double> &hf, std::vector<std::vector<double>> &MhK, std::vector<double> &u_k);
 
+std::vector<std::vector<double>> createIDmatrix(int size);
 #endif

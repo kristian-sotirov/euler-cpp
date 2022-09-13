@@ -1,13 +1,13 @@
 #ifndef EULER_H
 #define EULER_H
 
-std::tuple<std::vector<double>,double,std::vector<int>> eulerSolver(std::vector<std::vector<double>> &K, std::vector<std::vector<double>> &M, std::vector<double> &u_0, std::vector<double> &f, int N);
+std::vector<double> eulerSolver(std::vector<std::vector<double>> &K, std::vector<std::vector<double>> &M, std::vector<double> &u_0, std::vector<double> &f, int N);
 
 double gethmax(std::vector<std::vector<double>> &KinvM);
 
 double findMaxEigenvalue(std::vector<std::vector<double>> &KinvM);
 
-std::tuple<std::vector<double>, int> solveSingleStep(std::vector<double> &u_k, std::vector<std::vector<double>> &A, std::vector<double> &b, std::vector<std::vector<double>> &Pinv);
+std::vector<double> solveSingleStep(std::vector<double> &u_k, std::vector<std::vector<double>> &A, std::vector<double> &b, std::vector<std::vector<double>> &Pinv);
 
 void generateNextStep(std::vector<double> &u_k, double, std::vector<double> &z_k);
 
@@ -26,7 +26,5 @@ void LUdecomp(std::vector<std::vector<double>> &M);
 void forwardSub(std::vector<std::vector<double>> L,  std::vector<std::vector<double>> &ID);
 
 void backwardSub(std::vector<std::vector<double>> U, std::vector<std::vector<double>> &invM);
-
-std::vector<std::vector<double>> createIDmatrix(int size);
 
 #endif

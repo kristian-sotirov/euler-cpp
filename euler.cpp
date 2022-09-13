@@ -7,8 +7,13 @@
 #include "mult.h"
 #include "matrixGeneration.h"
 
-//THIS FUNCTION IS UNFINISHED!!!!!!!!!!
-std::tuple<std::vector<double>, double, std::vector<int>> eulerSolver(std::vector<std::vector<double>> &K, std::vector<std::vector<double>> &M, std::vector<double> &u_0, std::vector<double> &f, int N) {
+//The function takes as an argument the functions in the following order:
+//1) The matrix "K", representing the linear transformation of U.
+//2) The matrix "M" representing the discretisation of the derivative.
+//3) The vector "U_0", representing the initial condition.
+//4) The vector "f", representing the non-linear factor.
+//5) The number "N", which yields the "N-th" step for the equation.
+std::vector<double> eulerSolver(std::vector<std::vector<double>> &K, std::vector<std::vector<double>> &M, std::vector<double> &u_0, std::vector<double> &f, int N) {
 	
 	std::vector<std::vector<double>> invM = invLUfact(M);
 	std::vector<std::vector<double>> KinvM = multMatrix(K, invM);
@@ -28,24 +33,24 @@ std::tuple<std::vector<double>, double, std::vector<int>> eulerSolver(std::vecto
 	std::vector<int> k_values = std::vector<int>(N, 0);
 	
 	for(int i = 1; i <= N; i++) {
-		std::tuple<std::vector<double>, int> step_answer = solveSingleStep(u_k, M, b, Pinv);
-		u_k = std::get<0>(step_answer);
-		k_values[i] = std::get<1>(step_answer);
+		u_k = solveSingleStep(u_k, M, b, Pinv);
 		b = createb(hf, MhK, u_k);
 		std::cout << "Iternation: " << i << std::endl;
 	}
 	
-	std::tuple<std::vector<double>, double, std::vector<int>> return_value = std::make_tuple(u_k, h, k_values);
-	return return_value;
-
+	return u_k;
 }
 
+//Here we get the maximum step value h.
 double gethmax(std::vector<std::vector<double>> &KinvM) {
+
+	//To find h, we need to find the maximum eigenvalue of a specific matrix.
 	double max_eigenvalue = findMaxEigenvalue(KinvM);
 	double h_max = 2/max_eigenvalue;
 	return h_max;
 }
 
+//We find the maximum eigenvalue by considering the power method.
 double findMaxEigenvalue(std::vector<std::vector<double>> &KinvM) {
 
 	int n = KinvM.size();
@@ -65,8 +70,8 @@ double findMaxEigenvalue(std::vector<std::vector<double>> &KinvM) {
 	return eigval * eigval;
 }
 
-//THIS FUNCTION IS UNFINISHED!!!!!!!!!!
-std::tuple<std::vector<double>, int> solveSingleStep(std::vector<double> &u_k, std::vector<std::vector<double>> &A, std::vector<double> &b, std::vector<std::vector<double>> &Pinv) {
+//In this function we find Uk+1, having Uk. This is using the pre-conditioned gradient descent.
+std::vector<double> solveSingleStep(std::vector<double> &u_k, std::vector<std::vector<double>> &A, std::vector<double> &b, std::vector<std::vector<double>> &Pinv) {
 
 	int k = 0;
 	double tol = 0.000001;
@@ -85,12 +90,12 @@ std::tuple<std::vector<double>, int> solveSingleStep(std::vector<double> &u_k, s
 		dot_r = vecMult(r_k,r_k)/dot_r0;
 		k++;
 	}
+	
 	std::cout << "The error is " << dot_r << std::endl;
-	std::tuple<std::vector<double>, int> step_solution = std::make_tuple(u_k, k);
-	return step_solution;
+	return u_k;
 }
 
-//THIS FUNCTION IS UNFINISHED!!!!!!!!!!
+//This function moves along the next step, based on gradient descent.
 void generateNextStep(std::vector<double> &u_k, double alpha, std::vector<double> &z_k) {
 	int n = u_k.size();
 	for(int i = 0; i < n; i++) {
@@ -98,7 +103,7 @@ void generateNextStep(std::vector<double> &u_k, double alpha, std::vector<double
 	}
 }
 
-
+//This function find the inverse of a tri-diagonal matrix, using the LU factorisation method.
 std::vector<std::vector<double>> invLUtridiagfact(std::vector<std::vector<double>> P) {
 	
 	int n = P.size();
@@ -111,8 +116,9 @@ std::vector<std::vector<double>> invLUtridiagfact(std::vector<std::vector<double
 	return invP;
 }
 
-
+//This function transforms the tri-diagonal matrix P, into strictly lower triangular and upper triangular.
 void tdLUdecomp(std::vector<std::vector<double>> &P) {
+
 	int n = P.size();
 	for (int k = 0; k < n-1; k++) {
 		P[k+1][k] /= P[k][k];
@@ -120,10 +126,10 @@ void tdLUdecomp(std::vector<std::vector<double>> &P) {
 	}
 }
 
-
+//This function performs forward substitution, so that it finds the inverse.
 void tdforwardSub(std::vector<std::vector<double>> L, std::vector<std::vector<double>> &ID) {
-	int n = L.size();
-	
+
+	int n = L.size();	
 	for(int columns = 0; columns < n; columns++) {
 		for (int i = 1; i < n; i++) {
 			ID[i][columns] -= L[i][i-1]*ID[i-1][columns];
@@ -131,10 +137,10 @@ void tdforwardSub(std::vector<std::vector<double>> L, std::vector<std::vector<do
 	}
 }
 
-
+//This function performs backward substitution, so that it finds the inverse.
 void tdbackwardSub(std::vector<std::vector<double>> U, std::vector<std::vector<double>> &invP) {
-	int n = U.size();
-	
+
+	int n = U.size();	
 	for(int columns = 0; columns < n; columns++) {
 		invP[n-1][columns] /= U[n-1][n-1];
 		for(int i = n-2; i >= 0; i--) {
@@ -144,7 +150,7 @@ void tdbackwardSub(std::vector<std::vector<double>> U, std::vector<std::vector<d
 	}
 }
 
-//This functions find the inverse of a matrix using the LU factorisation.
+//This function finds the inverse of a matrix using the LU factorisation.
 std::vector<std::vector<double>> invLUfact(std::vector<std::vector<double>> M) {
 
 	int n = M.size();
@@ -157,15 +163,7 @@ std::vector<std::vector<double>> invLUfact(std::vector<std::vector<double>> M) {
 	return invM;
 }
 
-std::vector<std::vector<double>> createIDmatrix(int size) {
-
-	std::vector<std::vector<double>> ID = std::vector<std::vector<double>>(size, std::vector<double>(size, 0.0));
-	for(int i = 0; i < size; i++) {
-		ID[i][i] = 1.0;
-	}
-	return ID;
-}
-
+//Finding the LU decomposition.
 void LUdecomp(std::vector<std::vector<double>> &M) {
 
 	int n = M.size();
@@ -179,9 +177,10 @@ void LUdecomp(std::vector<std::vector<double>> &M) {
 	}
 }
 
+//This function performs forward substitution, so that it finds the inverse.
 void forwardSub(std::vector<std::vector<double>> L, std::vector<std::vector<double>> &ID) {
-	int n = L.size();
-	
+
+	int n = L.size();	
 	for(int IDcolumn = 0; IDcolumn < n; IDcolumn++) {
 		for (int i = 1; i < n; i++) {
 			for (int j = 0; j < i; j++) {
@@ -191,6 +190,7 @@ void forwardSub(std::vector<std::vector<double>> L, std::vector<std::vector<doub
 	}
 }
 
+//This function performs backward substitution, so that it finds the inverse.
 void backwardSub(std::vector<std::vector<double>> U, std::vector<std::vector<double>> &invM) {
 	
 	int n = U.size();
