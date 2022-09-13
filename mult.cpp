@@ -3,7 +3,7 @@
 #include <cmath>
 #include "mult.h"
 
-double vecMult(std::vector<double> &u, std::vector<double> &v) {
+double vecMult(std::vector<double> u, std::vector<double> v) {
 	
 	int p = u.size();
 	double  mult_value = 0.0;
@@ -45,7 +45,7 @@ std::vector<std::vector<double>> multMatrix(std::vector<std::vector<double>> &A,
 	return C;
 }
 
-std::vector<double> multMatrixVec(std::vector<std::vector<double>> &A, std::vector<double> &v) {
+std::vector<double> multMatrixVec(std::vector<std::vector<double>> &A, std::vector<double> v) {
 	int m = A.size();
 	int p = A[0].size();
 	

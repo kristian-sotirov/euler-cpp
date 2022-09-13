@@ -7,7 +7,7 @@ double gethmax(std::vector<std::vector<double>> &KinvM);
 
 double findMaxEigenvalue(std::vector<std::vector<double>> &KinvM);
 
-std::tuple<std::vector<double>, int> solveSingleStep(std::vector<double> &u_k, std::vector<std::vector<double>> &A, std::vector<double> &b, std::vector<std::vector<double>> &P);
+std::tuple<std::vector<double>, int> solveSingleStep(std::vector<double> &u_k, std::vector<std::vector<double>> &A, std::vector<double> &b, std::vector<std::vector<double>> &Pinv);
 
 void generateNextStep(std::vector<double> &u_k, double, std::vector<double> &z_k);
 

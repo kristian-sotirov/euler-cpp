@@ -19,7 +19,6 @@ std::tuple<std::vector<double>, double, std::vector<int>> eulerSolver(std::vecto
 	std::vector<std::vector<double>> MhK = createMhK(M, h, K);
 	std::vector<double> hf = createhf(h, f);
 	
-	
 	std::vector<double> u_k = u_0;	
 	std::vector<double> b = createb(hf, MhK, u_k);
 	
@@ -33,6 +32,7 @@ std::tuple<std::vector<double>, double, std::vector<int>> eulerSolver(std::vecto
 		u_k = std::get<0>(step_answer);
 		k_values[i] = std::get<1>(step_answer);
 		b = createb(hf, MhK, u_k);
+		std::cout << "Iternation: " << i << std::endl;
 	}
 	
 	std::tuple<std::vector<double>, double, std::vector<int>> return_value = std::make_tuple(u_k, h, k_values);
@@ -65,22 +65,37 @@ double findMaxEigenvalue(std::vector<std::vector<double>> &KinvM) {
 	return eigval * eigval;
 }
 
-//THIS FUNCTION IS UNFINISHED!!!!!!!!!
-std::tuple<std::vector<double>, int> solveSingleStep(std::vector<double> &u_k, std::vector<std::vector<double>> &A, std::vector<double> &b, std::vector<std::vector<double>> &P) {
+//THIS FUNCTION IS UNFINISHED!!!!!!!!!!
+std::tuple<std::vector<double>, int> solveSingleStep(std::vector<double> &u_k, std::vector<std::vector<double>> &A, std::vector<double> &b, std::vector<std::vector<double>> &Pinv) {
 
 	int k = 0;
-	std::vector<double> r = createR(b, A, u_k);
-	std::vector<double> solution_vector(5, 0.0);
+	double tol = 0.000001;
+	int max_k = 1000;
 	
-	
-	
-	std::tuple<std::vector<double>, int> step_solution = std::make_tuple(solution_vector, k);
+	std::vector<double> r_k = createR(b, A, u_k);
+	double dot_r0 = vecMult(r_k,r_k);
+	double dot_r = 1.0;
+	std::vector<double> z_k = r_k;
+	double alpha = 0.0;
+	while(k < max_k && dot_r > tol){
+		z_k = multMatrixVec(Pinv,r_k);
+		alpha = vecMult(r_k, z_k)/vecMult(z_k, multMatrixVec(A,z_k));
+		generateNextStep(u_k, alpha, z_k);
+		r_k = createR(b, A, u_k);
+		dot_r = vecMult(r_k,r_k)/dot_r0;
+		k++;
+	}
+	std::cout << "The error is " << dot_r << std::endl;
+	std::tuple<std::vector<double>, int> step_solution = std::make_tuple(u_k, k);
 	return step_solution;
 }
 
-//THIS FUNCTION IS UNFINISHED!!!!!!!!!
-void generateNextStep(std::vector<double> &u_k, double, std::vector<double> &z_k) {
-
+//THIS FUNCTION IS UNFINISHED!!!!!!!!!!
+void generateNextStep(std::vector<double> &u_k, double alpha, std::vector<double> &z_k) {
+	int n = u_k.size();
+	for(int i = 0; i < n; i++) {
+		u_k[i] += alpha*z_k[i];
+	}
 }
 
 
@@ -175,7 +190,6 @@ void forwardSub(std::vector<std::vector<double>> L, std::vector<std::vector<doub
 		}
 	}
 }
-
 
 void backwardSub(std::vector<std::vector<double>> U, std::vector<std::vector<double>> &invM) {
 	
